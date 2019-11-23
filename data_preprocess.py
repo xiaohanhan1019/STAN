@@ -35,7 +35,8 @@ with open(ds, "r") as f:
             data = [x for x in line.split(";")]
             sess_id = int(data[0])
             timestamp = time.mktime(time.strptime(data[4][:-1], '%Y-%m-%d'))
-            item = (int(data[2]), timestamp)
+            timeframe = int(data[3])
+            item = (int(data[2]), timestamp, timeframe)
 
         if sess_id in sess_clicks:
             sess_clicks[sess_id] += [item]
@@ -44,10 +45,10 @@ with open(ds, "r") as f:
             sess_clicks[sess_id] = [item]
             sess_date[sess_id] = timestamp  # timestamp取最后一个item的timestamp
 
-    # todo 排序问题
     if dataset == 'diginetica':
         for i in list(sess_clicks):
             sorted_clicks = sorted(sess_clicks[i], key=operator.itemgetter(1))
+            # sorted_clicks = sorted(sess_clicks[i], key=lambda x: (x[1], x[2]))  # 以日期为第一关键字,timeframe为第二关键字
             sess_clicks[i] = [c[0] for c in sorted_clicks]
 print("length of session clicks: %d" % len(sess_clicks))
 

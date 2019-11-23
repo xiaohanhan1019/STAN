@@ -9,8 +9,8 @@ import time
 
 # load data [id,x,t,y]
 # train_data = pickle.load(open('datasets/retailrocket/train_session_3.txt', 'rb'))
-# train_data = pickle.load(open('datasets/diginetica/train_session_3.txt', 'rb'))
-train_data = pickle.load(open('datasets/yoochoose/train_1_64_session_3.txt', 'rb'))
+train_data = pickle.load(open('datasets/diginetica/train_session_3.txt', 'rb'))
+# train_data = pickle.load(open('datasets/yoochoose/train_1_4_session_3.txt', 'rb'))
 train_id = train_data[0]
 train_session = train_data[1]
 train_timestamp = train_data[2]
@@ -21,8 +21,8 @@ for i, s in enumerate(train_session):
     train_session[i] += [train_predict[i]]
 
 # test_data = pickle.load(open('datasets/retailrocket/test_session_3.txt', 'rb'))
-# test_data = pickle.load(open('datasets/diginetica/test_session_3.txt', 'rb'))
-test_data = pickle.load(open('datasets/yoochoose/test_1_64_session_3.txt', 'rb'))
+test_data = pickle.load(open('datasets/diginetica/test_session_3.txt', 'rb'))
+# test_data = pickle.load(open('datasets/yoochoose/test_1_4_session_3.txt', 'rb'))
 test_id = test_data[0]
 test_session = test_data[1]
 test_timestamp = test_data[2]
@@ -31,7 +31,7 @@ test_predict = test_data[3]
 # model = SKNN(session_id=train_id, session=train_session, session_timestamp=train_timestamp, sample_size=0, k=500)
 # model = VSKNN(session_id=train_id, session=train_session, session_timestamp=train_timestamp, sample_size=0, k=500)
 model = STAN(session_id=train_id, session=train_session, session_timestamp=train_timestamp, sample_size=0, k=500,
-             factor1=True, l1=4, factor2=True, l2=10 * 24 * 3600, factor3=True, l3=20)
+             factor1=True, l1=2, factor2=True, l2=80 * 24 * 3600, factor3=True, l3=8.5)
 
 testing_size = len(test_session)
 # testing_size = 10
