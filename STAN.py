@@ -23,7 +23,6 @@ class STAN:
         self.session_item_cache = {}  # session_id: set(item_id)
         self.session_item_list_cache = {}  # session_id: [item_id] 为了给training sessions里的item weight
         for i, session in enumerate(self.session_all):
-            # sid = i  # traing data split的情况
             sid = self.session_id_all[i]  # current session id
             self.session_timestamp_cache.update({sid: self.session_timestamp_all[i]})
             for item in session:
@@ -49,9 +48,9 @@ class STAN:
         self.current_timestamp = 0
 
     def find_neighbours(self, session_items, input_item):
-        # 找neighbour候选
+        # neighbour candidate
         possible_neighbours = self.possible_neighbour_sessions(session_items, input_item)
-        # 求相似度取前k
+        # get top k according to similarity
         possible_neighbours = self.cal_similarity(session_items, possible_neighbours)
         possible_neighbours = sorted(possible_neighbours, reverse=True, key=lambda x: x[1])
         possible_neighbours = possible_neighbours[:self.k]
@@ -59,13 +58,20 @@ class STAN:
         return possible_neighbours
 
     def possible_neighbour_sessions(self, session_items, input_item):
+        # 只考虑含有testing session中的last item的session作为neighbour
+        # if input_item in self.item_session_cache:
+        #     return self.item_session_cache.get(input_item)
+        # else:
+        #     return set()
+
+        # 考虑含有testing session中任意一个item的session作为neighbour
         neighbours = set()
         for item in session_items:
             if item in self.item_session_cache:
                 neighbours = neighbours | self.item_session_cache.get(item)
         return neighbours
 
-    # 找时间最近的session
+    # find recent session (not use)
     def most_recent_sessions(self, sessions):
         recent_session = set()
         tuples = []
@@ -82,7 +88,7 @@ class STAN:
             recent_session.add(i[0])
         return recent_session
 
-    # 计算相似度
+    # calculate similarity
     def cal_similarity(self, session_items, sessions):
         neighbours = []
         for session in sessions:
@@ -95,6 +101,7 @@ class STAN:
                 neighbours += [(session, similarity)]
         return neighbours
 
+    # cosine similarity
     def cosine_similarity(self, s1, s2):
         common_item = s1 & s2
         similarity = 0
@@ -104,19 +111,19 @@ class STAN:
         l2 = len(s2)
         return similarity / math.sqrt(l1 * l2)
 
-    # 根据neighbour sessions对item打分
+    # scoring item according to their session
     def score_items(self, neighbours, session_items):
         scores = {}
         for session in neighbours:
             items = self.session_item_cache.get(session[0])
 
-            # find the lastest common_items in training session
+            # find the latest common_items in training session
             common_items_idx = -1
             for i, item in enumerate(items):
                 if item in session_items:
                     common_items_idx = i
-            if common_items_idx == -1:
-                print("no common item")  # will never happen
+            # if common_items_idx == -1:
+            #     print("no common item")  # will never happen
 
             for idx, item in enumerate(items):
                 old_score = scores.get(item)
